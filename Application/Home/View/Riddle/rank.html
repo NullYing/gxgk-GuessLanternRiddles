@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>微信排行</title>
+	<title>小喵灯谜竞猜排行榜</title>
 	<link rel="stylesheet" type="text/css" href="__PUBLIC__/css/style.css">
 	<style type="text/css">
 		.change{
@@ -91,7 +91,8 @@
 		    	</div>
 		    	<div class="clear"></div>
 	    	</div>
-
+		</if>
+		<if condition="$funtion eq true" >
 	    	<div class="btn">
 	        	<a class="change" href="change.html">兑换明信片</a>
                 <a class="change" href="give.html">转赠积分</a>
@@ -100,81 +101,29 @@
 		</if>
 		<!-- =====================================前十积分及排行===================================== -->
 		<div class="all-banking">
-			<h3>小喵灯谜竞猜总排行版</h3>
+			<h3>小喵灯谜竞猜前十名排行版</h3>
 			<div>
 				<p>排名</p>
 				<p>积分</p>
 				<p>昵称</p>
 			</div>
-
+			<volist name="toprank" id="rank">
 			<div>
-				<p>1</p>
-				<p>1364</p>
-				<p>小喵</p>
+				<p>{$rank.id}</p>
+				<p>{$rank.grade}</p>
+				<p>{$rank.nickname}</p>
 			</div>
-
-			<div>
-				<p>2</p>
-				<p>1222</p>
-				<p>小喵</p>
-			</div>
-
-			<div>
-				<p>3</p>
-				<p>1034</p>
-				<p>小喵</p>
-			</div>
-
-			<div>
-				<p>4</p>
-				<p>988</p>
-				<p>小喵</p>
-			</div>
-
-			<div>
-				<p>5</p>
-				<p>874</p>
-				<p>小喵</p>
-			</div>
-
-			<div>
-				<p>6</p>
-				<p>655</p>
-				<p>小喵</p>
-			</div>
-
-			<div>
-				<p>7</p>
-				<p>642</p>
-				<p>小喵</p>
-			</div>
-
-			<div>
-				<p>8</p>
-				<p>522</p>
-				<p>小喵</p>
-			</div>
-
-			<div>
-				<p>9</p>
-				<p>436</p>
-				<p>小喵</p>
-			</div>
-
-			<div>
-				<p>10</p>
-				<p>421</p>
-				<p>小喵</p>
-			</div>
-
+			</volist>
 		</div>
 	</div>
 
 	<a href="http://mp.weixin.qq.com/s?__biz=MzI1MzA1MzQ0MA==&mid=404318866&idx=1&sn=0c7b81f002dbf4a2415065178ac64490&scene=1&srcid=0209NNb2YxurUK1QEav4UWbJ#wechat_redirect" class="rules">游戏规则</a>
 
 <div class="footer">
+	<p>--程序By <a href="http://lastorder.cn">白月秋见心</a>--</p>
 	<p>--网页By <a href="http://blindcat.cn">瞎猫</a>--</p>
-	<p>--本活动最终解释权归莞香团队所有--</p>
+	<p>--感谢Hyper-Qing，DreamGeek</p>
+	<p>--本活动最终解释权归莞香广科团队所有--</p>
 </div>
 
 </body>

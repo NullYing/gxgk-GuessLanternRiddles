@@ -49,7 +49,7 @@ class RiddleController extends Controller {
   				$contect['phone']=$msg;
   				$contect['jointime']=date('Y-m-d H:i:s');
   				$SqlContact->data($contect)->add();
-  				$this->data='成功录入您的手机号，请回复"开始"，开始计时';
+  				$this->data='成功录入您的手机号，请回复“开始”，开始计时';
   				$this->display();
   				exit;
   			}
@@ -62,26 +62,45 @@ class RiddleController extends Controller {
   			$user['status']='willstart';
   			$SqlUser->data($user)->add();
   		}
+      //进入赠送积分状态
+      $UserInfo=$SqlUser->where('openid="%s"',$openid)->find();
+      if($UserInfo['status']==='End' AND strstr($msg,'赠送')){
+        unset($user);
+        $user['openid']=$openid;
+        $user['status']='WillSend';
+        $SqlUser->data($user)->save();
+        $this->data='请输入要对方的手机号\n注意：赠送积分将全部赠送';
+        $this->display();
+        exit;
+      }
+      if($UserInfo['status']==='WillSend'){
+        $this->_send_Grade($openid,$msg);
+        exit;
+      }
+      if($UserInfo['status']==='Sended'){
+        $this->data='本活动只能参与一次，不可多次参与\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">个人排名点我</a>\n\n回复“取消”回到正常模式';
+        $this->display();
+        exit;
+      }
       //已结束参加活动
-  		$UserInfo=$SqlUser->where('openid="%s"',$openid)->find();
-  		if($UserInfo['status']=='End'){
-  			$this->data='本活动只能参与一次，不可多次参与，回复“取消”回到正常模式';
+  		if($UserInfo['status']==='End'){
+  			$this->data='本活动只能参与一次，不可多次参与\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">个人排名点我</a>\n温馨提示：可将积分赠送给他人，为好友助攻，回复“赠送”，把积分赠送给好友\n\n回复“取消”回到正常模式';
   			$this->display();
-  			exit();
+  			exit;
   		}
       //活动计时到达
-      if($UserInfo['status']=='starting' AND strtotime("now")-strtotime($UserInfo['starttime'])>1800){
+      if($UserInfo['status']==='starting' AND strtotime("now")-strtotime($UserInfo['starttime'])>1800){
         unset($user);
         $user['openid']=$openid;
         $user['status']='End';
         $user['finaltime']=date('Y-m-d H:i:s');
         $SqlUser->data($user)->save();
-        $this->data='时间到！！！感谢你参与本次活动，快拉上亲友团送积分吧！';
+        $this->data='时间到！！！感谢你参与本次活动，快拉上亲友团送积分吧！\n查看<a href="http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'">个人排名点我</a>';
         $this->display();
-        exit();
+        exit;
       }
       //开始活动
-  		if($UserInfo['status']=='willstart' AND $msg=='开始'){
+  		if($UserInfo['status']==='willstart' AND $msg=='开始'){
         unset($user);
   			$user['openid']=$openid;
   			$user['status']='starting';
@@ -89,15 +108,15 @@ class RiddleController extends Controller {
   			$SqlUser->data($user)->save();
         $UserInfo=$SqlUser->where('openid="%s"',$openid)->find();
   		}
-      if($UserInfo['status']=='starting'){
+      if($UserInfo['status']==='starting'){
         $this->_judge_Answer($openid,$msg);
         $this->_getRiddle($openid);
-        exit();
+        exit;
       }
   		else{
-  			$this->data='请回复"开始"，开始计时';
+  			$this->data='请回复“开始”，开始计时';
   			$this->display();
-  			exit();
+  			exit;
   		}
     }
   protected function _getRiddle($openid){
@@ -150,24 +169,25 @@ class RiddleController extends Controller {
     $SqlAnswer=D("Answer");
     $AnswerData['openid']=$openid;
     $AnswerData['riddleid']=$FinalRiddle;
-    if($msg===$RiddleInfo[$FinalRiddle]['answer']){
+    if(strstr($msg,$RiddleInfo[$FinalRiddle]['answer'])){
       unset($data);
       $data['openid']=$openid;
       $data['grade']=$UserInfo['grade']+5;
       $SqlUser->data($data)->save();
 
       $AnswerData['YesOrNot']=1;
-      $this->data2='恭喜你，回答正确，加5分\n当前分数为：'.$data['grade'].'\n\n';
+      $this->data2='恭喜你，回答正确，加5分\n当前分数为：'.$data['grade'].'分\n\n';
     }
     else{
       $AnswerData['YesOrNot']=0;
-      $this->data2='很遗憾，回答错误\n不要紧，答错不会扣分\n可以换题哦！\n当前分数为：'.$UserInfo['grade'].'\n\n';
+      $this->data2='很遗憾，回答错误\n不要紧，答错不会扣分\n可以换题哦！\n当前分数为：'.$UserInfo['grade'].'分\n\n';
     }
     $AnswerData['AnswerTime']=date('Y-m-d H:i:s');
     $SqlAnswer->data($AnswerData)->save();
   }
   public function rank(){
-    $mydata=true;
+    $mydata=false;
+    $funtion=false;
     if(IS_POST){
       $key=I('post.key',"");
       if($key!="gxgkdevelor"){
@@ -182,15 +202,73 @@ class RiddleController extends Controller {
         exit;
       }
       $mydata=true;
+      $funtion=true;
+    }
+    else if(IS_GET){
+      $openid=I('get.openid',"");
+      if($openid!=""){
+        $mydata=true;
+      }
     }
     $this->mydata=$mydata;
+    $this->funtion=$funtion;
 
     $SqlUser=D("User");
     $SqlUser->join('Contact ON Contact.openid = User.openid');
-    $UserInfo=$SqlUser->order('grade DESC')->limit(10)->field('nickname,grade')->select();
-    $UserMy=$SqlUser->where('openid="%s"',$openid)->find();
-    $this->mygrade=$UserMy['grade'];
-    $this->data=$UserInfo;
+    $UserInfo=$SqlUser->order('grade DESC')->field('User.openid,nickname,grade')->select();
+    for($myrank=0;$myrank<sizeof($UserInfo);$myrank++){
+      if($UserInfo[$myrank]['openid']===$openid){
+        $UserMy=$UserInfo[$myrank];
+        break;
+      }
+    }
+    if(sizeof($UserMy)===0){
+      $this->mygrade='暂无积分';
+      $this->myrank='暂无排名';
+    }
+    else{
+      $this->mygrade=$UserMy['grade'];
+      $this->myrank=$myrank+1;
+    }
+    for($id=0;$id<10;$id++){
+      $toprank[$id]['id']=$id+1;
+      $toprank[$id]['nickname']=$UserInfo[$id]['nickname'];
+      $toprank[$id]['grade']=$UserInfo[$id]['grade'];
+    }
+    $this->toprank=$toprank;
     $this->display();
+  }
+  protected function _send_Grade($openid,$msg){
+    $SqlUser=D("User");
+    $SqlContact=D("Contact");
+    if(!preg_match("/1[3458]{1}\d{9}$/",$msg)){
+      $this->data='请输入正确的手机号';
+      $this->display();
+      exit;
+    }
+    $result=$SqlContact->where('phone="%s"',$msg)->find();
+    if(!$result){
+      $this->data='该手机号未参加活动';
+      $this->display();
+      exit;
+    }
+    $ReceiveMan=$SqlUser->where('openid="%s"',$result['openid'])->find();
+    $SendMan=$SqlUser->where('openid="%s"',$openid)->find();
+    //清空发送者的分数
+    $data['openid']=$openid;
+    $data['grade']=0;
+    $data['status']='Sended';
+    $SqlUser->data($data)->save();
+    //给予接受者增加分数
+    unset($data);
+    $data['openid']=$ReceiveMan['openid'];
+    $data['grade']=$ReceiveMan['grade']+$SendMan['grade'];
+    $SqlUser->data($data)->save();
+    $this->data='已经将积分赠送给'.$result['nickname'].'啦！';
+    $this->display();
+    exit;
+  }
+  protected function _exchange_Postcard($openid,$msg){
+
   }
 }
