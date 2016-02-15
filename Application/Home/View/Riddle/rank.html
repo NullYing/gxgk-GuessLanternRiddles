@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>微信排行</title>
+	<link rel="stylesheet" type="text/css" href="__PUBLIC__/css/style.css">
+	<style type="text/css">
+		.change{
+			width: 40%;
+			height: 80px;
+			background-color: #d75552;
+			float: left;
+			margin-left: 6.66%;
+			color: #fff;
+			line-height: 80px;
+			font-size: 23px;
+			text-decoration: none;
+			text-align: center;
+			margin-top: 10px;
+		}
+
+		.change:hover{
+			text-decoration: none;
+			color: #fff;
+		}
+
+		.btn{
+			width: 100%;
+		}
+
+		.all-banking{
+			width: 88%;
+			height: 490px;
+			margin: 10px auto;
+			padding-top: 20px;
+			color: #fff;
+			background: -webkit-linear-gradient(#d75552, #e17f7d); /* Safari 5.1 - 6.0 */
+			background:      -o-linear-gradient(#d75552, #e17f7d); /* Opera 11.1 - 12.0 */
+			background:    -moz-linear-gradient(#d75552, #e17f7d); /* Firefox 3.6 - 15 */
+			background:         linear-gradient(#d75552, #e17f7d); /* 标准的语法 */
+		}
+		.all-banking h3{
+			width: 100%;
+			text-align: center;
+			display: block;
+			height: 35px;
+			line-height: 35px;
+			font-size: 20px;
+			font-weight: 300;
+			margin-bottom: 15px;
+		}
+		.all-banking>div{
+			width: 100%;
+			height: 39px;
+			border-bottom: 1px solid #fff;
+		}
+		.all-banking>div p{
+			height: 100%;
+			line-height: 39px;
+			text-align: center;
+			font-size: 18px;
+			display: block;
+			float: left;
+		}
+		.all-banking>div p:first-child{
+			width: 20%;
+		}
+		.all-banking>div p:first-child+p{
+			width: 40%;
+		}
+		.all-banking>div p:first-child+p+p{
+			width: 40%;
+		}
+	</style>
+</head>
+<body>
+	<img src="__PUBLIC__/images/riddle_rank.png" class="head-img">
+	<div class="main">
+		<!-- <h2>小喵灯谜竞猜排行榜</h2> -->
+		<if condition="$mydata eq true" >
+		<!-- =====================================我的积分及排行===================================== -->
+		    <div class="user">
+			    <div class="user-box poits">
+		     		<h4>我的积分</h4>
+		    		<h3>{$mygrade}</h3>
+		    	</div>
+		    	<div class="user-box ranking">
+			    	<h4>我的排名</h4>
+			    	<h3>{$myrank}</h3>
+		    	</div>
+		    	<div class="clear"></div>
+	    	</div>
+
+	    	<div class="btn">
+	        	<a class="change" href="change.html">兑换明信片</a>
+                <a class="change" href="give.html">转赠积分</a>
+	     		<div class="clear"></div>
+	    	</div>
+		</if>
+		<!-- =====================================前十积分及排行===================================== -->
+		<div class="all-banking">
+			<h3>小喵灯谜竞猜总排行版</h3>
+			<div>
+				<p>排名</p>
+				<p>积分</p>
+				<p>昵称</p>
+			</div>
+
+			<div>
+				<p>1</p>
+				<p>1364</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>2</p>
+				<p>1222</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>3</p>
+				<p>1034</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>4</p>
+				<p>988</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>5</p>
+				<p>874</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>6</p>
+				<p>655</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>7</p>
+				<p>642</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>8</p>
+				<p>522</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>9</p>
+				<p>436</p>
+				<p>小喵</p>
+			</div>
+
+			<div>
+				<p>10</p>
+				<p>421</p>
+				<p>小喵</p>
+			</div>
+
+		</div>
+	</div>
+
+	<a href="http://mp.weixin.qq.com/s?__biz=MzI1MzA1MzQ0MA==&mid=404318866&idx=1&sn=0c7b81f002dbf4a2415065178ac64490&scene=1&srcid=0209NNb2YxurUK1QEav4UWbJ#wechat_redirect" class="rules">游戏规则</a>
+
+<div class="footer">
+	<p>--网页By <a href="http://blindcat.cn">瞎猫</a>--</p>
+	<p>--本活动最终解释权归莞香团队所有--</p>
+</div>
+
+</body>
+</html>
