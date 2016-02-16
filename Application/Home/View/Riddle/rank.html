@@ -1,11 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cmn-Hans">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>小喵灯谜竞猜排行榜</title>
+
+	<if condition="$mydata eq true" >
+		<title>{$nickname}的灯谜竞猜排行榜</title>
+	<else />
+		<title>小喵灯谜竞猜排行榜</title>
+	</if>
+
 	<link rel="stylesheet" type="text/css" href="__PUBLIC__/css/style.css">
 	<style type="text/css">
+		.happy{
+			display: block;
+			width: 92%;
+			height: 30px;
+			font-size: 20px;
+			text-align: right;
+			color: #fff;
+			line-height: 30px;
+		}
 		.change{
 			width: 40%;
 			height: 80px;
@@ -76,6 +91,7 @@
 </head>
 <body>
 	<img src="__PUBLIC__/images/riddle_rank.png" class="head-img">
+	<p class="happy">新年好！{$nickname}</p>
 	<div class="main">
 		<!-- <h2>小喵灯谜竞猜排行榜</h2> -->
 		<if condition="$mydata eq true" >
