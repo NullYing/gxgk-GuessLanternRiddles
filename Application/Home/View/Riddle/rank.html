@@ -91,14 +91,14 @@
 </head>
 <body>
 	<img src="__PUBLIC__/images/riddle_rank.png" class="head-img">
-	<p class="happy">新年好！{$nickname}</p>
+	<p class="happy">元宵节快乐！{$nickname}</p>
 	<div class="main">
 		<!-- <h2>小喵灯谜竞猜排行榜</h2> -->
 		<if condition="$mydata eq true" >
 		<!-- =====================================我的积分及排行===================================== -->
 		    <div class="user">
 			    <div class="user-box poits">
-		     		<h4>我的积分</h4>
+		     		<h4>我的喵币</h4>
 		    		<h3>{$mygrade}</h3>
 		    	</div>
 		    	<div class="user-box ranking">
@@ -120,7 +120,7 @@
 			<h3>小喵灯谜竞猜前十名排行版</h3>
 			<div>
 				<p>排名</p>
-				<p>积分</p>
+				<p>喵币</p>
 				<p>昵称</p>
 			</div>
 			<volist name="toprank" id="rank">
