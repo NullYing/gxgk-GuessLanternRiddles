@@ -73,18 +73,17 @@ class RiddleController extends Controller {
     $UserInfo=$SqlUser->where('openid="%s"',$openid)->find();
     switch ($UserInfo['status']) {
       case 'willstart':
-        /*
-        //进入喵币兑换状态
         if(strstr($msg,'兑换')){
-          $this->_enter_ExchangeStatus($SqlUser,$UserInfo,$openid,$msg);
+          $this->data='参加今天的活动后，才能兑换明信片';
+          $this->display();
           break;
         }
-        //进入赠送喵币状态
         else if(strstr($msg,'赠送')){
-          $this->_enter_SendStatus($SqlUser,$UserInfo,$openid,$msg);
+          $this->data='参加今天的活动后，才能赠送喵币';
+          $this->display();
           break;
         }
-        */
+        
         if($msg=='开始'){
           $this->_startActivity($SqlUser,$UserInfo,$openid,$msg);
         }
@@ -331,19 +330,22 @@ class RiddleController extends Controller {
     $user['openid']=$openid;
     $user['status']='willsend';
     $SqlUser->data($user)->save();
-    $this->data='请输入要对方的手机号\n注意：赠送喵币将全部赠送';
+    $this->data='请输入要对方的手机号\n注意：赠送喵币将全部赠送\n\n如想退出赠送，请回复“返回”';
     $this->display();
     exit;
   }
   protected function _send_Grade($SqlUser,$SendMan,$openid,$msg){
     $SqlContact=D("Contact");
+    if($msg=='返回'){
+      $this->_return_End($SqlUser,$openid);
+    }
     if(!preg_match("/1[3458]{1}\d{9}$/",$msg)){
       $this->data='请输入正确的手机号';
       $this->display();
       exit;
     }
-    $result=$SqlContact->where('phone="%s"',$msg)->find();
-    if(!$result){
+    $ContactInfo=$SqlContact->where('phone="%s"',$msg)->find();
+    if(!$ContactInfo){
       $this->data='该手机号未参加活动\n自动退出赠送模式';
       $this->display();
       $user['openid']=$openid;
@@ -351,7 +353,7 @@ class RiddleController extends Controller {
       $SqlUser->data($user)->save();
       exit;
     }
-    $ReceiveMan=$SqlUser->where('openid="%s"',$result['openid'])->find();
+    $ReceiveMan=$SqlUser->where('openid="%s"',$ContactInfo['openid'])->find();
     if(!$SendMan OR !$ReceiveMan){
       $this->data='小喵出错啦，请重试！';
       $this->display();
@@ -369,14 +371,24 @@ class RiddleController extends Controller {
     //清空发送者的喵币
     $data['openid']=$openid;
     $data['grade']=0;
+    $data['sendtime']=$SendMan['sendtime']+1;
     $data['status']='End';
     $SqlUser->data($data)->save();
     //给予接受者增加喵币
     unset($data);
     $data['openid']=$ReceiveMan['openid'];
     $data['grade']=$ReceiveMan['grade']+$SendMan['grade'];
+    $data['receivetime']=$ReceiveMan['receivetime']+1;
     $SqlUser->data($data)->save();
-    $this->data='已经将喵币赠送给'.$result['nickname'].'啦！';
+    $this->data='已经将喵币赠送给'.$ContactInfo['nickname'].'啦！';
+    $this->display();
+    exit;
+  }
+  protected function _return_End($SqlUser,$openid){
+    $user['openid']=$openid;
+    $user['status']='End';
+    $this->data='喵，已经成功返回啦';
+    $SqlUser->data($user)->save();
     $this->display();
     exit;
   }
@@ -394,7 +406,7 @@ class RiddleController extends Controller {
     $user['openid']=$openid;
     $user['status']='ExchangePostcard';
     $SqlUser->data($user)->save();
-    $this->data='请输入要兑换的明信片数量\n注意：兑换明信片将影响影响排名，一张明信片为100喵币\n\n你拥有'.$ContactInfo['postcard'].'张明信片\n你可兑换'.(floor($UserInfo['grade']/100)).'张明信片\n小喵剩余下'.$TotalPostcard['total'].'张明信片';
+    $this->data='请输入要兑换的明信片数量\n注意：兑换明信片将影响影响排名，一张明信片为100喵币\n\n你拥有'.$ContactInfo['postcard'].'张明信片\n你可兑换'.(floor($UserInfo['grade']/100)).'张明信片\n小喵剩余下'.$TotalPostcard['total'].'张明信片\n\n如想退出兑换，请回复“返回”';
     $this->display();
     exit;
   }
@@ -402,6 +414,9 @@ class RiddleController extends Controller {
     $SqlContact=D("Contact");
     $SqlUser=D("User");
     $SqlPostCard=D("PostCard");
+    if($msg=='返回'){
+      $this->_return_End($SqlUser,$openid);
+    }
     if(preg_match("/[^\d-., ]/",$num)){
       $this->data='喵！请输入数量，且不带中文';
       $this->display();
@@ -585,7 +600,7 @@ class RiddleController extends Controller {
           $this->data='喵！坏人，尝试违规刷题，你已被小喵封印，小喵不准你参加本次活动啦！';
           break;
         default:
-          # code...
+          $this->data='喵，系统错误，请回复“取消”，之后召唤客服';
           break;
       }
       $this->display();
