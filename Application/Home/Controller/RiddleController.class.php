@@ -11,61 +11,31 @@ class RiddleController extends Controller {
         $this->_logPhone($openid,$nickname,$msg);
   		}
       $SqlUser=D("User");
+      $result=$SqlUser->where('openid="%s"',$openid)->count();
+      if($result==0){
+        $user['openid']=$openid;
+        $user['status']='willstart';
+        $SqlUser->data($user)->add();
+      }
       $UserInfo=$SqlUser->where('openid="%s"',$openid)->find();
       if(!$UserInfo){
-        $this->data='小喵在数据库中找不到你，呜呜呜，请联系客服';
-        $this->display();
-        exit;
-      }
-      //刷题封禁
-      if($UserInfo['foultime']>5){
-        $this->data='喵！坏人，尝试违规刷题，你已被小喵封印，小喵不准你参加本次活动啦！';
+        $this->data='小喵在数据库中找不到你，呜呜呜，请回复“取消”，之后召唤客服';
         $this->display();
         exit;
       }
       //进入状态
-      switch ($UserInfo['status']) {
-        case 'willstart':
-          if($msg=='开始'){
-            $this->_startActivity($SqlUser,$UserInfo,$openid,$msg);
-          }
-          else{
-            $this->data='请回复“开始”，开始计时';
-            $this->display();
-            exit;
-          }
-          break;
-        case 'End':
-          //进入喵币兑换状态
-          if(strstr($msg,'兑换')){
-            $this->_enter_ExchangeStatus($SqlUser,$UserInfo,$openid,$msg);
-          }
-          //进入赠送喵币状态
-          else if(strstr($msg,'赠送')){
-            $this->_enter_SendStatus($SqlUser,$UserInfo,$openid,$msg);
-          }
-          $this->_endActivity($SqlUser,$UserInfo,$openid,$msg);
-          break;
-        case 'Starting':
-          //活动计时到达
-          $this->_checkTimeOut($SqlUser,$UserInfo,$openid,$msg);
-          $this->_judge_Answer($openid,$msg);
-          $this->_getRiddle($openid);
-          break;
-        case 'ExchangePostcard':
-          $this->_exchange_Postcard($openid,$msg);
-          break;
-        case 'willsend':
-          $this->_send_Grade($SqlUser,$UserInfo,$openid,$msg);
-          break;
-        default:
-          $this->data='呜呜呜，处于无效状态，请联系客服';
-          $this->display();
-          exit;
-          break;
-      }
+      $this->_entern_Status($SqlUser,$UserInfo,$openid,$msg);
+    }
+  protected function _checkFoul($SqlUser,$UserInfo,$openid,$msg){
+    if($UserInfo['foultime']>5){
+      $user['openid']=$openid;
+      $user['status']='Baned';
+      $SqlUser->data($user)->save();
+      $this->data='喵！坏人，尝试违规刷题，你已被小喵封印，小喵不准你参加本次活动啦！';
+      $this->display();
       exit;
     }
+  }
   protected function _checkReceive(&$openid,&$nickname,&$msg){
       if(IS_POST){
         $key=I('post.key',"");
@@ -98,6 +68,71 @@ class RiddleController extends Controller {
         $this->display();
         exit;
       }
+  }
+  protected function _entern_Status($SqlUser,$UserInfo,$openid,$msg){
+    $UserInfo=$SqlUser->where('openid="%s"',$openid)->find();
+    switch ($UserInfo['status']) {
+      case 'willstart':
+        /*
+        //进入喵币兑换状态
+        if(strstr($msg,'兑换')){
+          $this->_enter_ExchangeStatus($SqlUser,$UserInfo,$openid,$msg);
+          break;
+        }
+        //进入赠送喵币状态
+        else if(strstr($msg,'赠送')){
+          $this->_enter_SendStatus($SqlUser,$UserInfo,$openid,$msg);
+          break;
+        }
+        */
+        if($msg=='开始'){
+          $this->_startActivity($SqlUser,$UserInfo,$openid,$msg);
+        }
+        else{
+          $this->data='请回复“开始”，开始计时';
+          $this->display();
+          exit;
+        }
+        break;
+      case 'End':
+        //进入喵币兑换状态
+        if(strstr($msg,'兑换')){
+          $this->_enter_ExchangeStatus($SqlUser,$UserInfo,$openid,$msg);
+          break;
+        }
+        //进入赠送喵币状态
+        else if(strstr($msg,'赠送')){
+          $this->_enter_SendStatus($SqlUser,$UserInfo,$openid,$msg);
+          break;
+        }
+        $this->_endActivity($SqlUser,$UserInfo,$openid,$msg);
+        $this->data='本活动一天只能参与一次\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“取消”回到正常模式';
+        $this->display();
+        break;
+      case 'Starting':
+        //刷题封禁
+        $this->_checkFoul($SqlUser,$UserInfo,$openid,$msg);
+        //活动计时到达
+        $this->_checkTimeOut($SqlUser,$UserInfo,$openid,$msg);
+        $this->_judge_Answer($openid,$msg);
+        $this->_getRiddle($openid);
+        break;
+      case 'ExchangePostcard':
+        $this->_exchange_Postcard($openid,$msg);
+        break;
+      case 'willsend':
+        $this->_send_Grade($SqlUser,$UserInfo,$openid,$msg);
+        break;
+      case 'Baned':
+        $this->data='喵！坏人，尝试违规刷题，你已被小喵封印，小喵不准你参加本次活动啦！';
+        $this->display();
+        break;
+      default:
+        $this->data='呜呜呜，处于无效状态，请回复“取消”，之后召唤客服';
+        $this->display();
+        break;
+      }
+      exit;
   }
   protected function _logPhone($openid,$nickname,$msg){
     if(!preg_match("/1[3458]{1}\d{9}$/",$msg)){
@@ -137,32 +172,33 @@ class RiddleController extends Controller {
           $user['threestart']=date('Y-m-d H:i:s');
           break;
         default:
-          $this->data='呜呜呜，小喵系统出错啦';
+          $this->data='呜呜呜，小喵系统出错啦，请回复“取消”，之后召唤客服';
           $this->display();
           exit;
       }
       $SqlUser->data($user)->save();
+      $this->_entern_Status($SqlUser,$UserInfo,$openid,$msg);
   }
   protected function _checkTimeOut($SqlUser,$UserInfo,$openid,$msg){
     $user['openid']=$openid;
     $user['status']='End';
     if($UserInfo['joinnum']==1 AND strtotime("now")-strtotime($UserInfo['starttime'])>1200){
       $user['firstend']=date('Y-m-d H:i:s');
-      $this->data='时间到！！！欢迎明天继续参加活动，快拉上亲友团送喵币吧！\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>';
+      $this->data='时间到！！！欢迎明天继续参加活动，快拉上亲友团送喵币吧！\n\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>';
       $SqlUser->data($user)->save();
       $this->display();
       exit;
     }
     else if($UserInfo['joinnum']==2 AND strtotime("now")-strtotime($UserInfo['secondstart'])>1200 ){
       $user['secondend']=date('Y-m-d H:i:s');
-      $this->data='时间到！！！欢迎明天继续参加活动，快拉上亲友团送喵币吧！\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>';
+      $this->data='时间到！！！欢迎明天继续参加活动，快拉上亲友团送喵币吧！\n\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>';
       $SqlUser->data($user)->save();
       $this->display();
       exit;
     }
     else if($UserInfo['joinnum']==3 AND strtotime("now")-strtotime($UserInfo['threestart'])>1200){
       $user['threeend']=date('Y-m-d H:i:s');
-      $this->data='时间到！！！感谢你参与本次活动，快拉上亲友团送喵币吧！\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>';
+      $this->data='时间到！！！感谢你参与本次活动，快拉上亲友团送喵币吧！\n\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>';
       $SqlUser->data($user)->save();
       $this->display();
       exit;
@@ -175,7 +211,7 @@ class RiddleController extends Controller {
     $AnswerInfo=$SqlAnswer->where('openid="%s"',$openid)->select();
     $RiddleInfo=$SqlRiddle->select();
     if(!$RiddleInfo){
-      $this->data='抽出题目错误！！！系统异常';
+      $this->data='抽出题目错误！！！系统异常，请回复“取消”，之后召唤客服';
       $this->display();
       exit;
     }
@@ -249,14 +285,14 @@ class RiddleController extends Controller {
     unset($data);
     $data['openid']=$openid;
     $data['finalanswer']=date('Y-m-d H:i:s');
-    if(strstr($msg,$RiddleInfo[$FinalRiddle]['answer'])){
+    if(strstr($msg,$RiddleInfo[$FinalRiddle]['answer']) OR strstr($msg,$RiddleInfo[$FinalRiddle]['answer2'])){
       $data['grade']=$UserInfo['grade']+5;
       $AnswerData['YesOrNot']=1;
-      $this->data2='恭喜你，回答正确，加5分\n当前喵币为：'.$data['grade'].'分\n\n';
+      $this->data2='恭喜你，回答正确，加5分\n当前喵币为：'.$data['grade'].'\n\n';
     }
     else{
       $AnswerData['YesOrNot']=0;
-      $this->data2='很遗憾，回答错误\n不要紧，答错不会扣分\n可以换题哦！\n当前喵币为：'.$UserInfo['grade'].'分\n\n';
+      $this->data2='很遗憾，回答错误\n不要紧，答错不会扣分\n可以换题哦！\n当前喵币为：'.$UserInfo['grade'].'\n\n';
     }
     $SqlUser->data($data)->save();
     $AnswerData['AnswerTime']=date('Y-m-d H:i:s');
@@ -285,11 +321,6 @@ class RiddleController extends Controller {
       $this->display();
       exit;
     }
-    else{
-      $this->data='本活动一天只能参与一次\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“取消”回到正常模式';
-      $this->display();
-      exit;
-    }
   }
   protected function _enter_SendStatus($SqlUser,$UserInfo,$openid,$msg){
     if($UserInfo['grade']==0){
@@ -313,7 +344,7 @@ class RiddleController extends Controller {
     }
     $result=$SqlContact->where('phone="%s"',$msg)->find();
     if(!$result){
-      $this->data='该手机号未参加活动，自动退出赠送模式';
+      $this->data='该手机号未参加活动\n自动退出赠送模式';
       $this->display();
       $user['openid']=$openid;
       $user['status']='End';
@@ -328,7 +359,7 @@ class RiddleController extends Controller {
     }
     //判断手机号是否为自己的
     if($ReceiveMan['openid']===$openid){
-      $this->data='不可将喵币赠送给自己，自动退出赠送模式';
+      $this->data='不可将喵币赠送给自己\n自动退出赠送模式';
       $this->display();
       $user['openid']=$openid;
       $user['status']='End';
@@ -350,6 +381,7 @@ class RiddleController extends Controller {
     exit;
   }
   protected function _enter_ExchangeStatus($SqlUser,$UserInfo,$openid,$msg){
+    $SqlContact=D("Contact");
     if($UserInfo['grade']==0){
       $this->data='对不起，你的喵币为0，无法兑换';
       $this->display();
@@ -357,11 +389,12 @@ class RiddleController extends Controller {
     }
     $SqlPostCard=D("PostCard");
     $TotalPostcard=$SqlPostCard->where('id="0"')->find();
+    $ContactInfo=$SqlContact->where('openid="%s"',$openid)->find();
     unset($user);
     $user['openid']=$openid;
     $user['status']='ExchangePostcard';
     $SqlUser->data($user)->save();
-    $this->data='请输入要兑换的明信片数量\n注意：兑换明信片将影响影响排名，一张明信片为50喵币\n\n你拥有'.$result['postcard'].'张明信片\n你可兑换'.($UserInfo['grade']/50).'张明信片\n小喵剩余下'.$TotalPostcard['total'].'张明信片';
+    $this->data='请输入要兑换的明信片数量\n注意：兑换明信片将影响影响排名，一张明信片为100喵币\n\n你拥有'.$ContactInfo['postcard'].'张明信片\n你可兑换'.(floor($UserInfo['grade']/100)).'张明信片\n小喵剩余下'.$TotalPostcard['total'].'张明信片';
     $this->display();
     exit;
   }
@@ -369,19 +402,28 @@ class RiddleController extends Controller {
     $SqlContact=D("Contact");
     $SqlUser=D("User");
     $SqlPostCard=D("PostCard");
-    if($msg<0 OR $msg=='兑换'){
+    if(preg_match("/[^\d-., ]/",$num)){
+      $this->data='喵！请输入数量，且不带中文';
+      $this->display();
+      exit;
+    }
+    else{
+      $num=(int)$msg;
+      $num=floor($num);
+    }
+    if(!is_numeric($num) OR $num<=0){
       $this->data='喵！请输入正确的数量';
       $this->display();
       exit;
     }
     $UserInfo=$SqlUser->where('openid="%s"',$openid)->find();
     //喵币足够兑换
-    if($UserInfo['grade']<50*$msg){
+    if($UserInfo['grade']<100*$num){
       unset($user);
       $user['openid']=$openid;
       $user['status']='End';
       $SqlUser->data($user)->save();
-      $this->data='对不起，你的喵币不够兑换';
+      $this->data='对不起，你的喵币不够兑换\n自动退出兑换模式';
       $this->display();
       exit;
     }
@@ -402,29 +444,29 @@ class RiddleController extends Controller {
       exit;
     }
     //检查剩余张数大于兑换数
-    if($msg>$TotalPostcard['total']){
+    if($num>$TotalPostcard['total']){
       $this->data='喵！对不起，小喵的明信片没有剩下这么多！呜呜呜！！\n剩余明信片数量'.$TotalPostcard['total'].'张';
       $this->display();
       exit;
     }
     else{
       $data['id']=0;
-      $data['total']=$TotalPostcard['total']-$msg;
+      $data['total']=$TotalPostcard['total']-$num;
       $SqlPostCard->data($data)->save();
     }
     //扣除相应喵币
     unset($data);
     $data['openid']=$openid;
-    $data['grade']=$UserInfo['grade']-50*$msg;
+    $data['grade']=$UserInfo['grade']-100*$num;
     $SqlUser->data($data)->save();
     //增加明信片数量
     $ContactInfo=$SqlContact->where('openid="%s"',$openid)->find();
     unset($data);
     $data['openid']=$openid;
-    $data['postcard']=$ContactInfo['postcard']+$msg;
+    $data['postcard']=$ContactInfo['postcard']+$num;
     $SqlContact->data($data)->save();
 
-    $this->data='已经成功兑换'.$msg.'张明信片！\n\n你已兑换了'.$data['postcard'].'张明信片\n小喵剩下'.($TotalPostcard['total']-$msg).'张明信片可以兑换\n活动结束后，小喵将联系你';
+    $this->data='已经成功兑换'.$num.'张明信片！\n\n你已兑换了'.$data['postcard'].'张明信片\n小喵剩下'.($TotalPostcard['total']-$num).'张明信片可以兑换\n活动结束后，小喵将联系你';
     $this->display();
     unset($user);
     $user['openid']=$openid;
@@ -435,23 +477,7 @@ class RiddleController extends Controller {
   public function rank(){
     $mydata=false;
     $funtion=false;
-    if(IS_POST){
-      $key=I('post.key',"");
-      if($key!="gxgkdevelor"){
-        $this->data='非法请求';
-        $this->display();
-        exit;
-      }
-      $openid=I('post.openid',"");
-      if($openid==""){
-        $this->data='非法请求';
-        $this->display();
-        exit;
-      }
-      $mydata=true;
-      $funtion=true;
-    }
-    else if(IS_GET){
+    if(IS_GET){
       $openid=I('get.openid',"");
       if($openid!=""){
         $mydata=true;
@@ -487,37 +513,7 @@ class RiddleController extends Controller {
     $this->display();
   }
   public function riddlebegin(){
-    if(IS_GET){
-        $key=I('get.key',"");
-        if($key!="gxgkdevelor"){
-          $this->data='非法请求';
-          $this->display();
-          exit;
-        }
-        $openid=I('get.openid',"");
-        if($openid==""){
-          $this->data='非法请求';
-          $this->display();
-          exit;
-        }
-        $nickname=I('get.nickname',"");
-        if($nickname==""){
-          $this->data='非法请求';
-          $this->display();
-          exit;
-        }
-        $msg=I('get.msg',"");
-        if($msg==""){
-          $this->data='非法请求';
-          $this->display();
-          exit;
-        }
-    }
-    else{
-      $this->data='非法请求';
-      $this->display();
-      exit;
-    }
+    $this->_checkReceive($openid,$nickname,$msg);
     $SqlUser=D("User");
     $SqlContact=D("Contact");
     $result=$SqlContact->where('openid="%s"',$openid)->count();
@@ -538,22 +534,62 @@ class RiddleController extends Controller {
     }
     else{
       $UserInfo=$SqlUser->where('openid="%s"',$openid)->find();
-      if($UserInfo['joinnum']==1 AND $UserInfo['status']=='willstart'){
-        $this->data='欢迎参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n注：\n1.喵币为本次活动积分名称\n2.您所输入的手机号仅作为领取活动奖品以及喵币赠送凭据\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n\n回复“开始”开始计时';
-        $this->display();
-        exit;
+      switch ($UserInfo['status']) {
+        case 'willstart':
+          switch ($UserInfo['joinnum']) {
+            case '1':
+              $this->data='欢迎参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n注：\n1.喵币为本次活动积分名称\n2.您所输入的手机号仅作为领取活动奖品以及喵币赠送凭据\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
+              break;
+            case '2':
+              $this->data='欢迎继续参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
+              break;
+            case '3':
+              $this->data='欢迎继续参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
+              break;
+            default:
+              $this->data='喵，系统错误，请回复“取消”，之后召唤客服';
+              break;
+          }
+          break;
+        case 'End':
+          switch ($UserInfo['joinnum']) {
+            case '1':
+              $this->_endActivity($SqlUser,$UserInfo,$openid,$msg);
+              $this->data='本活动一天只能参与一次\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“取消”回到正常模式';
+              break;
+            case '2':
+              $this->_endActivity($SqlUser,$UserInfo,$openid,$msg);
+              $this->data='本活动一天只能参与一次\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“取消”回到正常模式';
+              break;
+            case '3':
+              $this->data='感谢您对本次活动的支持\n已经达到最大参加次数\n活动结束后排名前十的同学以及兑换了明信片的同学，小喵将联系您，请耐心等待\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”';
+              break;
+            default:
+              $this->data='喵，系统错误，请回复“取消”，之后召唤客服';
+              break;
+          }
+          break;
+        case 'Starting':
+          $this->_endActivity($SqlUser,$UserInfo,$openid,$msg);
+          $this->_checkTimeOut($SqlUser,$UserInfo,$openid,$msg);
+          $this->data='喵，赶紧答题，还有时间，快！快！快！\n\n回复“取消”回到正常模式';
+          break;
+        case 'ExchangePostcard':
+          $this->data='喵，正处于兑换明信片状态\n请回复正确的明信片数量\n注意：兑换明信片将影响影响排名，一张明信片为100喵币\n你可兑换'.(floor($UserInfo['grade']/100)).'张明信片\n\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>';
+          break;
+        case 'willsend':
+          $this->data='喵，正处于喵币赠送状态\n请回复对方的手机号赠送喵币\n注意：赠送喵币将全部赠送\n\n查看<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>';
+          break;
+        case 'Baned':
+          $this->order='noenter';
+          $this->data='喵！坏人，尝试违规刷题，你已被小喵封印，小喵不准你参加本次活动啦！';
+          break;
+        default:
+          # code...
+          break;
       }
-      else if($UserInfo['joinnum']==2 AND $UserInfo['status']=='End'){
-        $this->data='欢迎继续参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n\n回复“开始”开始计时';
-        $this->display();
-        exit;
-      }
-      else if($UserInfo['joinnum']==3 AND $UserInfo['status']=='End'){
-        $this->order='noenter';
-        $this->data='感谢您对本次活动的支持\n活动结束后排名前十的同学以及兑换了明信片的同学，我们将联系您，请耐心等待\n\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”';
-        $this->display();
-        exit;
-      }
+      $this->display();
+      exit;
     }
   }
 }
