@@ -368,6 +368,14 @@ class RiddleController extends Controller {
       $SqlUser->data($user)->save();
       exit;
     }
+    if($ReceiveMan['receivetime']>10){
+      $this->data='该用户超过最大被赠送次数\n自动退出赠送模式';
+      $this->display();
+      $user['openid']=$openid;
+      $user['status']='End';
+      $SqlUser->data($user)->save();
+      exit;
+    }
     //清空发送者的喵币
     $data['openid']=$openid;
     $data['grade']=0;
@@ -533,7 +541,7 @@ class RiddleController extends Controller {
     $SqlContact=D("Contact");
     $result=$SqlContact->where('openid="%s"',$openid)->count();
     if($result==0){
-      $this->data='欢迎参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n注：\n1.喵币为本次活动积分名称\n2.您所输入的手机号仅作为领取活动奖品以及喵币赠送凭据\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n\n请输入您的手机';
+      $this->data='欢迎参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日晚上12点\n\n注：\n1.喵币为本次活动积分名称\n2.您所输入的手机号仅作为领取活动奖品以及喵币赠送凭据\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n\n请输入您的手机';
       $this->display();
       exit;
     }
@@ -543,7 +551,7 @@ class RiddleController extends Controller {
       $user['openid']=$openid;
       $user['status']='willstart';
       $SqlUser->data($user)->add();
-      $this->data='欢迎参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n注：\n1.喵币为本次活动积分名称\n2.您所输入的手机号仅作为领取活动奖品以及喵币赠送凭据\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n\n回复“开始”开始计时';
+      $this->data='欢迎参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日晚上12点\n\n注：\n1.喵币为本次活动积分名称\n2.您所输入的手机号仅作为领取活动奖品以及喵币赠送凭据\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n\n回复“开始”开始计时';
       $this->display();
       exit;
     }
@@ -553,13 +561,13 @@ class RiddleController extends Controller {
         case 'willstart':
           switch ($UserInfo['joinnum']) {
             case '1':
-              $this->data='欢迎参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n注：\n1.喵币为本次活动积分名称\n2.您所输入的手机号仅作为领取活动奖品以及喵币赠送凭据\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
+              $this->data='欢迎参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日晚上12点\n\n注：\n1.喵币为本次活动积分名称\n2.您所输入的手机号仅作为领取活动奖品以及喵币赠送凭据\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
               break;
             case '2':
-              $this->data='欢迎继续参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
+              $this->data='欢迎继续参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日晚上12点\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
               break;
             case '3':
-              $this->data='欢迎继续参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日凌晨0点\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
+              $this->data='欢迎继续参加小喵灯谜竞猜活动\n\n每个人将有20分钟时间答题，且答题期间无法暂停\n活动结束时间：\n2月23日晚上12点\n\n回复“取消”退出猜灯谜活动\n<a href=\"http://lantern.gxgk.cc/?s=/Home/Riddle/rank/openid/'.$openid.'\">排行榜点我</a>\n温馨提示：\n赠送喵币，请回复“赠送”\n兑换明信片，请回复“兑换”\n\n回复“开始”开始计时';
               break;
             default:
               $this->data='喵，系统错误，请回复“取消”，之后召唤客服';
