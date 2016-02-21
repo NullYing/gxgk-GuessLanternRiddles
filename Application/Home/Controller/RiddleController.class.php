@@ -368,7 +368,7 @@ class RiddleController extends Controller {
       $SqlUser->data($user)->save();
       exit;
     }
-    if($ReceiveMan['receivetime']>10){
+    if(($SendMan['receivetime']+$ReceiveMan['receivetime'])>=10){
       $this->data='该用户超过最大被赠送次数\n自动退出赠送模式';
       $this->display();
       $user['openid']=$openid;
@@ -386,7 +386,7 @@ class RiddleController extends Controller {
     unset($data);
     $data['openid']=$ReceiveMan['openid'];
     $data['grade']=$ReceiveMan['grade']+$SendMan['grade'];
-    $data['receivetime']=$ReceiveMan['receivetime']+1;
+    $data['receivetime']=$SendMan['receivetime']+$ReceiveMan['receivetime']+1;
     $SqlUser->data($data)->save();
     $this->data='已经将喵币赠送给'.$ContactInfo['nickname'].'啦！';
     $this->display();
