@@ -10,7 +10,7 @@
 		<title>小喵灯谜竞猜排行榜</title>
 	</if>
 
-	<link rel="stylesheet" type="text/css" href="__PUBLIC__/css/style.css">
+	<!-- <link rel="stylesheet" type="text/css" href="__PUBLIC__/css/style.css"> -->
 	<style type="text/css">
 		.happy{
 			display: block;
@@ -74,7 +74,7 @@
 			height: 100%;
 			line-height: 39px;
 			text-align: center;
-			font-size: 18px;
+			font-size: 14px;
 			display: block;
 			float: left;
 		}
@@ -82,10 +82,130 @@
 			width: 20%;
 		}
 		.all-banking>div p:first-child+p{
-			width: 40%;
+			width: 20%;
 		}
 		.all-banking>div p:first-child+p+p{
+			width: 20%;
+		}
+		.all-banking>div p:first-child+p+p+p{
 			width: 40%;
+		}
+
+		*{
+			font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif;
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+		.clear{
+			clear: both;
+		}
+		body{
+			width: 100%;
+			background-color: #ce2b27;
+		}
+		.head-img{
+			width: 100%;
+			display: block;
+			background-color: #fff;
+		}
+		.main{
+			width: 100%;
+		}
+		.main h2{
+			height: 35px;
+			line-height: 35px;
+			font-size: 20px;
+			display: block;
+			width: 100%;
+			text-align: center;
+			font-weight: 500;
+			color: #333;
+		}
+		.user{
+			width: 100%;
+		}
+		.user-box{
+			width: 40%;
+			height: 80px;
+			background-color: #d75552;
+			float: left;
+			margin-left: 6.66%;
+			margin-top: 20px;
+		}
+		.user-box h3,.user-box h4{
+			width: 100%;
+			height: 50%;
+			text-align: center;
+			line-height: 40px;
+			color: #fff;
+			font-size: 18px;
+			font-weight: 500;
+		}
+		.user-box h3{
+			font-size: 27px;
+		}
+
+		.change-box{
+			width: 88%;
+			margin: 10px auto;
+		}
+
+		.change-box [type='text']{
+			width: 96%;
+			height: 45px;
+			outline: none;
+			border: 1px solid #ccc;
+			background-color: #d75552;
+			font-size: 20px;
+			color: #ccc;
+			padding-left: 4%;
+			text-align: center;
+		}
+
+		.change-box [type='submit']{
+			width: 100%;
+			margin-top: 10px;
+			outline: none;
+			border: 1px solid #ccc;
+			background-color: #ce2b27;
+			height: 45px;
+			color: #fff;
+			font-size: 20px;
+			border-radius: 5px;
+		}
+
+		.tip{
+			width: 90%;
+			display: block;
+			margin: 5px auto;
+			text-align: center;
+			font-size: 13px;
+			line-height: 20px;
+			color: #fff;
+		}
+
+		.rules{
+			display: block;
+			width: 100%;
+			text-align: center;
+			color: #fff;
+			text-decoration: underline;
+		}
+
+		.footer{
+			width: 100%;
+			margin-top: 30px;
+		}
+
+		.footer p{
+			width: 100%;
+			height: 20px;
+			font-size: 13px;
+			text-align: center;
+			line-height: 20px;
+			display: block;
+			color: #fff;
 		}
 	</style>
 </head>
@@ -105,6 +225,14 @@
 			    	<h4>我的排名</h4>
 			    	<h3>{$myrank}</h3>
 		    	</div>
+		    	<div class="user-box poits">
+			    	<h4>赠送次数</h4>
+			    	<h3>{$mysend}</h3>
+		    	</div>
+		    	<div class="user-box poits">
+			    	<h4>被赠次数</h4>
+			    	<h3>{$myreceive}</h3>
+		    	</div>
 		    	<div class="clear"></div>
 	    	</div>
 		</if>
@@ -117,23 +245,28 @@
 		</if>
 		<!-- =====================================前十积分及排行===================================== -->
 		<div class="all-banking">
-			<h3>小喵灯谜竞猜前十名排行版</h3>
+			<h3>小喵灯谜竞猜前十名排行榜</h3>
 			<div>
 				<p>排名</p>
-				<p>喵币</p>
+				<p>总喵币</p>
+				<p>被赠数</p>
 				<p>昵称</p>
 			</div>
 			<volist name="toprank" id="rank">
 			<div>
 				<p>{$rank.id}</p>
 				<p>{$rank.grade}</p>
+				<p>{$rank.receivetime}</p>
 				<p>{$rank.nickname}</p>
 			</div>
 			</volist>
 		</div>
 	</div>
-
-	<a href="http://mp.weixin.qq.com/s?__biz=MzI1MzA1MzQ0MA==&mid=404318866&idx=1&sn=0c7b81f002dbf4a2415065178ac64490&scene=1&srcid=0209NNb2YxurUK1QEav4UWbJ#wechat_redirect" class="rules">游戏规则</a>
+	
+	<p class="tip">注：喵币数量=答题获得喵币数+好友赠送喵币数</p>
+	<p class="tip">为公平起见已限制最大被赠喵币次数为10次</p>
+	<p class="tip">并赠送的喵币带着被赠送次数赠送出去</p>
+	<a href="http://mp.weixin.qq.com/s?__biz=MzI1MzA1MzQ0MA==&mid=404318866&idx=1&sn=0c7b81f002dbf4a2415065178ac64490&scene=1&srcid=0209NNb2YxurUK1QEav4UWbJ#wechat_redirect" class="rules">活动规则</a>
 
 <div class="footer">
 	<p>--程序By <a href="http://lastorder.cn">白月秋见心</a>--</p>

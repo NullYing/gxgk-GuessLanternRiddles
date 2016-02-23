@@ -40,24 +40,28 @@ class RiddleController extends Controller {
       if(IS_POST){
         $key=I('post.key',"");
         if($key!="gxgkdevelor"){
+          \Think\Log::record('非法密钥：'.$key,'WARN');
           $this->data='非法请求';
           $this->display();
           exit;
         }
         $openid=I('post.openid',"");
         if($openid==""){
+          \Think\Log::record('非法openid','WARN');
           $this->data='非法请求';
           $this->display();
           exit;
         }
         $nickname=I('post.nickname',"");
         if($nickname==""){
-          $this->data='非法请求';
+          \Think\Log::record('非法nickname：'.$openid,'WARN');
+          $this->data='非法昵称，请修改你的微信昵称，不建议带有表情符号';
           $this->display();
           exit;
         }
         $msg=I('post.msg',"");
         if($msg==""){
+          \Think\Log::record('非法msg：'.$openid.$msg,'WARN');
           $this->data='非法请求';
           $this->display();
           exit;
@@ -65,6 +69,7 @@ class RiddleController extends Controller {
       }
       else{
         $this->data='非法请求';
+        \Think\Log::record('非post','WARN');
         $this->display();
         exit;
       }
@@ -511,7 +516,7 @@ class RiddleController extends Controller {
 
     $SqlUser=D("User");
     $SqlUser->join('Contact ON Contact.openid = User.openid');
-    $UserInfo=$SqlUser->order('grade DESC,finalanswer ASC')->field('User.openid,nickname,grade')->select();
+    $UserInfo=$SqlUser->order('grade DESC,finalanswer ASC')->field('User.openid,nickname,grade,sendtime,receivetime')->select();
     for($myrank=0;$myrank<sizeof($UserInfo);$myrank++){
       if($UserInfo[$myrank]['openid']===$openid){
         $UserMy=$UserInfo[$myrank];
@@ -521,15 +526,20 @@ class RiddleController extends Controller {
     if(sizeof($UserMy)===0){
       $this->mygrade='暂无喵币';
       $this->myrank='暂无排名';
+      $this->mysend='暂无';
+      $this->myreceive='暂无';
     }
     else{
       $this->nickname=$UserMy['nickname'];
       $this->mygrade=$UserMy['grade'];
       $this->myrank=$myrank+1;
+      $this->mysend=$UserMy['sendtime'];
+      $this->myreceive=$UserMy['receivetime'];
     }
     for($id=0;$id<10;$id++){
       $toprank[$id]['id']=$id+1;
       $toprank[$id]['nickname']=$UserInfo[$id]['nickname'];
+      $toprank[$id]['receivetime']=$UserInfo[$id]['receivetime'];
       $toprank[$id]['grade']=$UserInfo[$id]['grade'];
     }
     $this->toprank=$toprank;
