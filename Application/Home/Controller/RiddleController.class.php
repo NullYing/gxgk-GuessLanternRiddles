@@ -48,14 +48,14 @@ class RiddleController extends Controller {
         $openid=I('post.openid',"");
         if($openid==""){
           \Think\Log::record('非法openid','WARN');
-          $this->data='非法请求';
+          $this->data='非法Id';
           $this->display();
           exit;
         }
         $nickname=I('post.nickname',"");
         if($nickname==""){
           \Think\Log::record('非法nickname：'.$openid,'WARN');
-          $this->data='非法昵称，请修改你的微信昵称，不建议带有表情符号';
+          $this->data='非法昵称';
           $this->display();
           exit;
         }
