@@ -13,13 +13,15 @@
         如不同意该声明请不要使用该软件，谢谢合作。
 
 # PHP接口
+
 * 猜灯谜接口地址：http://localhost/lantern/?s=/Home/Riddle/index
 * 排行榜访问地址：http://localhost/lantern/?s=/Home/Riddle/rank
 * 开始前获取提示与状态地址：http://localhost/lantern/?s=/Home/Riddle/riddlebegin
 * 错误记录日志：\Application\Runtime\Logs
 * 必须可读可写文件目录：\Application\Runtime
+
 ## 使用说明
-        1.搭建php、mysql运行环境，略
+    	1.搭建php、mysql运行环境，略
         2.假设服务器在远程
         创建\Application\Home\Conf\server.php文件
         写入
@@ -40,12 +42,16 @@
            \Application\Home\Controller找到函数 _checkReceive设置key变量
         4.发送post到接口地址，post参数为
             openid，nickname，msg
+
 ## 待改进
+
         1.未用宏变量设置喵币（代码所用分数代称）变化
             如兑换明信片所需分数，答对分数，答错分数
         2.自定义错误未输出到日志
         3.应用抽出固定数量难度题目，代替同一难度题目全部抽出
+
 ## 莞香广科
+
 [莞香广科](http://www.gxgk.cc)是学生自建的互联网创新团队。团队成立于2012年5月，以校园论坛起步，逐渐发展了校园网资源共享站、媒体中心、微信助手等项目。
 
 # ThinkPHP
