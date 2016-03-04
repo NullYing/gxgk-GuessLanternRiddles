@@ -1,4 +1,56 @@
-﻿## 简介
+﻿# 广科小喵猜灯谜
+![gxgk](http://www.gxgk.cc/image/logo.png)
+##  关于
+        Copyleft © 2016 NULLYING
+        Author:白月秋见心
+        http://www.lastfighting.com/
+        Email: ourweijiang@gmail.com
+
+        关于“广科小喵猜灯谜接口”的声明：
+	    1.该代码已成功在2016年2月22日~24日运行使用，参加人数共1012人，活动举办公众号：广科小喵（gxgkcat）
+	    2.基于ThinkPHP3.2.3遵守Apache开源协议
+	    3.使用该接口代码，请勿修改排行榜底部作者信息
+        如不同意该声明请不要使用该软件，谢谢合作。
+
+# PHP接口
+* 猜灯谜接口地址：http://localhost/lantern/?s=/Home/Riddle/index
+* 排行榜访问地址：http://localhost/lantern/?s=/Home/Riddle/rank
+* 开始前获取提示与状态地址：http://localhost/lantern/?s=/Home/Riddle/riddlebegin
+* 错误记录日志：\Application\Runtime\Logs
+* 必须可读可写文件目录：\Application\Runtime
+## 使用说明
+        1.搭建php、mysql运行环境，略
+        2.假设服务器在远程
+        创建\Application\Home\Conf\server.php文件
+        写入
+        <?php
+            return array(
+            'DB_CONFIG'=>array(
+            'db_type'    =>   'mysql',
+            'db_host'    =>   '数据库连接地址',
+            'db_user'    =>   '数据库账号',
+            'db_pwd'     =>   '数据库密码',
+            'db_port'    =>    数据库端口号,
+            'db_name'    =>    'xmlantern',
+            'db_charset' =>    'utf8mb4'
+             )
+        );
+        导入根文件xmlantern.sql
+        3.设置接口通讯密钥
+           \Application\Home\Controller找到函数 _checkReceive设置key变量
+        4.发送post到接口地址，post参数为
+            openid，nickname，msg
+## 待改进
+        1.未用宏变量设置喵币（代码所用分数代称）变化
+            如兑换明信片所需分数，答对分数，答错分数
+        2.自定义错误未输出到日志
+        3.应用抽出固定数量难度题目，代替同一难度题目全部抽出
+## 莞香广科
+[莞香广科](http://www.gxgk.cc)是学生自建的互联网创新团队。团队成立于2012年5月，以校园论坛起步，逐渐发展了校园网资源共享站、媒体中心、微信助手等项目。
+
+# ThinkPHP
+
+## 简介
 
 ThinkPHP 是一个免费开源的，快速、简单的面向对象的 轻量级PHP开发框架 ，创立于2006年初，遵循Apache2开源协议发布，是为了敏捷WEB应用开发和简化企业应用开发而诞生的。ThinkPHP从诞生以来一直秉承简洁实用的设计原则，在保持出色的性能和至简的代码的同时，也注重易用性。并且拥有众多的原创功能和特性，在社区团队的积极参与下，在易用性、扩展性和性能方面不断优化和改进，已经成长为国内最领先和最具影响力的WEB应用开发框架，众多的典型案例确保可以稳定用于商业以及门户级的开发。
 
