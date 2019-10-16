@@ -1,11 +1,6 @@
 ﻿# 广科小喵猜灯谜
 ![gxgk](http://www.gxgk.cc/image/logo.png)
 ##  关于
-        Copyleft © 2016 NULLYING
-        Author:白月秋见心
-        http://www.lastfighting.com/
-        Email: ourweijiang@gmail.com
-
         关于“广科小喵猜灯谜接口”的声明：
 	    1.该代码已成功在2016年2月22日~24日运行使用，参加人数共1012人，活动举办公众号：广科小喵（gxgkcat）
 	    2.基于ThinkPHP3.2.3遵守Apache开源协议
